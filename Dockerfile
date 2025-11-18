@@ -1,6 +1,8 @@
+FROM maven:3.9-eclipse-temurin-25-alpine AS base
+
 ######################
 # STAGE 1: Get Dependencies
-FROM maven:3.9-eclipse-temurin-25 AS dependencies
+FROM base AS dependencies
 
 WORKDIR /app
 
@@ -11,7 +13,7 @@ RUN mvn dependency:go-offline -B
 
 ######################
 # STAGE 2: Build
-FROM maven:3.9-eclipse-temurin-25 AS build
+FROM base AS build
 
 WORKDIR /app
 
@@ -26,7 +28,7 @@ RUN mvn package -DskipTests
 # STAGE 3: Run
 
 # Use smaller image
-FROM eclipse-temurin:25-jdk
+FROM eclipse-temurin:25-jre-alpine
 
 WORKDIR /app
 
