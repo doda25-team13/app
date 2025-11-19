@@ -8,8 +8,9 @@ WORKDIR /app
 
 COPY pom.xml .
 
-RUN mvn dependency:go-offline -B
-
+# Download parent pom and transitive dependencies + other needed Maven plugins for mvn package to work offline
+RUN mvn -B -Dmaven.repo.local=.m2repo help:effective-pom
+RUN mvn -B -Dmaven.repo.local=.m2repo dependency:resolve dependency:resolve-plugins
 
 ######################
 # STAGE 2: Build
@@ -21,8 +22,8 @@ COPY --from=dependencies /app /app
 
 COPY src ./src
 
-# skip tests for faster build
-RUN mvn package -DskipTests
+# skip tests for faster build and give location of local Maven repository
+RUN mvn -o -DskipTests -Dmaven.repo.local=.m2repo package
 
 ######################
 # STAGE 3: Run
