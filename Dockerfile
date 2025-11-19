@@ -9,7 +9,6 @@ WORKDIR /app
 COPY pom.xml .
 
 # Download parent pom and transitive dependencies + other needed Maven plugins for mvn package to work offline
-RUN mvn -B -Dmaven.repo.local=.m2repo help:effective-pom
 RUN mvn -B -Dmaven.repo.local=.m2repo dependency:resolve dependency:resolve-plugins
 
 ######################
