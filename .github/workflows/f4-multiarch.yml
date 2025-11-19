@@ -1,7 +1,8 @@
 name: F4 - Build multi-arch app image
 
 on:
-  workflow_dispatch:
+  push:
+    tags: ["v[0-9]+.[0-9]+.[0-9]+"]
 
 jobs:
   build-app:
