@@ -36,6 +36,8 @@ COPY --from=build /app/target/*.jar app.jar
 
 ENV SERVER_PORT=8080
 
+ENV MODEL_HOST=http://model-service:8081
+
 EXPOSE ${SERVER_PORT}
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["sh", "-c", "java -jar app.jar --server.port=${SERVER_PORT}"]
