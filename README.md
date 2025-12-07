@@ -15,11 +15,18 @@ The server runs on port 8080. Once its startup has finished, you can access [loc
 
 ## Running the Frontend with Docker
 
-First, build the Docker image:
+First, build the Docker image. 
+
+To be able to authenticate and download private packages from GitHub, you need to provide your credentials as build arguments.
+
+**Make sure that the provided Personal Access Token (PAT) has (at least) read:packages permissions enabled!**
 
 ```bash
 cd /path/to/project
-docker build -t sms-frontend:latest .
+docker build \
+  --build-arg GITHUB_ACTOR=github_username \
+  --build-arg GITHUB_TOKEN=github_token \
+  -t sms-frontend:latest .
 ```
 
 Then, run the container
