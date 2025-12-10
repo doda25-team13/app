@@ -33,6 +33,8 @@ jobs:
           IMG="ghcr.io/${{ github.repository }}"
           IMG=${IMG@L}
           docker build \
+            --build-arg GITHUB_ACTOR=${{ github.actor }} \
+            --build-arg GITHUB_TOKEN=${{ secrets.GH_TOKEN }} \
             --tag $IMG:${{ env.version }} \
             --tag $IMG:${{ env.version_major }}.${{ env.version_minor }}.latest \
             --tag $IMG:${{ env.version_major }}.latest \

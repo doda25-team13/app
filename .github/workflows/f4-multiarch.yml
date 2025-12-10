@@ -38,3 +38,6 @@ jobs:
           push: true
           tags: |
             ${{ env.image_name }}:latest
+          build-args: |
+            GITHUB_ACTOR=${{ github.actor }}
+            GITHUB_TOKEN=${{ secrets.GH_TOKEN }}
