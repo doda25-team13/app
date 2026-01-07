@@ -6,6 +6,9 @@ on:
 jobs:
   build-and-release:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: write
 
     steps:
       - uses: actions/checkout@v4
@@ -14,6 +17,30 @@ jobs:
         run: |
           IMG="ghcr.io/${{ github.repository }}"   # ghcr.io/doda25-team13/app
           echo "image_name=${IMG@L}" >> $GITHUB_ENV
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      - name: Extract version from pom.xml
+        id: version
+        run: |
+          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Set version env vars
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+
+          MAJOR=$(echo "$VERSION" | cut -d . -f 1)
+          MINOR=$(echo "$VERSION" | cut -d . -f 2)
+
+          echo "version=$VERSION" >> $GITHUB_ENV
+          echo "version_major=$MAJOR" >> $GITHUB_ENV
+          echo "version_minor=$MINOR" >> $GITHUB_ENV
 
       - name: Set up QEMU (for multi-arch)
         uses: docker/setup-qemu-action@v3
@@ -27,17 +54,6 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GH_TOKEN }}
-
-      - name: Parse version info from tag
-        run: |
-          VERSION=${GITHUB_REF:11}
-          MAJOR=$(echo "$VERSION" | cut -d . -f 1)
-          MINOR=$(echo "$VERSION" | cut -d . -f 2)
-          PATCH=$(echo "$VERSION" | cut -d . -f 3)
-          echo "version=$VERSION" >> $GITHUB_ENV
-          echo "version_major=$MAJOR" >> $GITHUB_ENV
-          echo "version_minor=$MINOR" >> $GITHUB_ENV
-          echo "version_patch=$PATCH" >> $GITHUB_ENV
 
       - name: Build and push app (multi-arch)
         uses: docker/build-push-action@v5
