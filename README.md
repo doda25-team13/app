@@ -13,28 +13,66 @@ The frontend service can be started through running the `Main` class (e.g., in y
 
 The server runs on port 8080. Once its startup has finished, you can access [localhost:8080/sms](http://localhost:8080/sms) in your browser to interact with the application.
 
+### Required Setup (First Time Only)
+
+**GitHub Packages requires authentication.** Configure it once, use it everywhere.
+
+#### Step 1: Create GitHub Personal Access Token
+
+1. Go to [GitHub Settings → Tokens](https://github.com/settings/tokens)
+2. Click **"Generate new token (classic)"**
+3. Configure and generate token
+4. **Copy the token**
+
+#### Step 2: Configure Maven Settings
+
+Create or edit `~/.m2/settings.xml` on your computer with your `YOUR_GITHUB_USERNAME` and `YOUR_GITHUB_TOKEN`:
+```xml
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                              http://maven.apache.org/xsd/settings-1.0.0.xsd">
+  <servers>
+    <server>
+      <id>github</id>
+      <username>YOUR_GITHUB_USERNAME</username>
+      <password>YOUR_GITHUB_TOKEN</password>
+    </server>
+  </servers>
+</settings>
+```
+
+
+**Important:** The `<id>github</id>` matches the repository ID in this app's `pom.xml`, allowing Maven to automatically use these credentials when downloading lib-version.
+
 ## Running the Frontend with Docker
-
-First, build the Docker image. 
-
-To be able to authenticate and download private packages from GitHub, you need to provide your credentials as build arguments.
-
-**Make sure that the provided Personal Access Token (PAT) has (at least) read:packages permissions enabled!**
+Build application:
 
 ```bash
-cd /path/to/project
-docker build \
-  --build-arg GITHUB_ACTOR=github_username \
-  --build-arg GITHUB_TOKEN=github_token \
-  -t sms-frontend:latest .
+mvn clean package -DskipTests
 ```
 
-Then, run the container
+Build the Docker image:
 
 ```bash
-docker run -p 8080:8080 \
-  -e MODEL_HOST="http://localhost:8081" \
-  sms-frontend:latest
+docker build -t app:latest .
 ```
 
-Frontend will be available at [localhost:8080/sms](http://localhost:8080/sms).
+Run the container:
+
+```bash
+docker run -p 8080:8080 app:latest
+```
+
+Access the application at: http://localhost:8080/sms
+
+Or you can specify the environment variables:
+
+- `SERVER_PORT` - sets the port the frontend server runs on (default set to `8080`)
+- `MODEL_HOST` - specifies where backend service is running (default set to `http://localhost:8081`)
+
+For example
+
+```bash
+docker run -p 8085:8085 -e APP_PORT=8085 -e MODEL_HOST=http://localhost:8082 app:latest
+```
